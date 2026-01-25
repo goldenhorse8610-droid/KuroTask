@@ -1,0 +1,160 @@
+.history-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 2rem;
+}
+
+.history-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-main);
+    border-radius: var(--radius-card);
+    padding: 1.5rem;
+    transition: box-shadow 0.2s;
+}
+
+.history-card:hover {
+    box-shadow: var(--shadow-soft);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.history-task-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.history-task-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.history-category-badge {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--brand-blue);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.history-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.history-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    font-size: 0.95rem;
+}
+
+.detail-item {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.detail-item.full {
+    grid-column: span 2;
+    flex-direction: column;
+}
+
+.detail-label {
+    color: var(--text-muted);
+    font-weight: 500;
+    min-width: 40px;
+}
+
+.duration-value {
+    color: var(--brand-blue);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+
+.history-memo {
+    background: var(--bg-input);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.no-memo {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.pagination {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    color: var(--text-muted);
+}
+
+.pagination button {
+    background: var(--bg-card);
+    border: 1px solid var(--border-main);
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+.pagination button:disabled {
+    opacity: 0.3;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: var(--radius-card);
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.modal-content textarea {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border-main);
+    border-radius: 8px;
+    padding: 1rem;
+    color: var(--text-main);
+    font-size: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
