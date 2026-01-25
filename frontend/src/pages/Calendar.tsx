@@ -31,7 +31,6 @@ export default function Calendar() {
     const [viewMode, setViewMode] = useState<'year' | 'month' | 'week' | 'day'>('month');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [events, setEvents] = useState<Record<string, CalendarEvent[]>>({});
-    const [tasks, setTasks] = useState<any[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -57,7 +56,6 @@ export default function Calendar() {
             const res = await axios.get(`${apiUrl}/tasks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setTasks(res.data.tasks);
             const cats = Array.from(new Set(res.data.tasks.map((t: any) => t.category).filter(Boolean))) as string[];
             setCategories(cats);
         } catch (error) {
