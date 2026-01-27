@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import './History.css';
-
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Session {
     id: string;
@@ -20,6 +19,7 @@ interface Session {
 }
 
 export default function History() {
+    const { apiUrl } = useAuth();
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -37,7 +37,7 @@ export default function History() {
         const token = localStorage.getItem('token');
         setLoading(true);
         try {
-            const res = await axios.get(`${API_BASE}/timer/history?page=${page}&limit=20`, {
+            const res = await axios.get(`${apiUrl}/timer/history?page=${page}&limit=20`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSessions(res.data.sessions);
@@ -53,7 +53,7 @@ export default function History() {
         if (!confirm('この記録を削除しますか？')) return;
         const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${API_BASE}/timer/sessions/${id}`, {
+            await axios.delete(`${apiUrl}/timer/sessions/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchHistory();
@@ -66,7 +66,7 @@ export default function History() {
         if (!editingSession) return;
         const token = localStorage.getItem('token');
         try {
-            await axios.patch(`${API_BASE}/timer/sessions/${editingSession.id}`, {
+            await axios.patch(`${apiUrl}/timer/sessions/${editingSession.id}`, {
                 endMemo: editEndMemo
             }, {
                 headers: { Authorization: `Bearer ${token}` }

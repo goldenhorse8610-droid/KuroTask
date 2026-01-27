@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import { requestNotificationPermission } from '../utils/notifications';
 import './Settings.css';
 
-const API_BASE = `http://${window.location.hostname}:3000`;
-
 export default function Settings() {
+    const { apiUrl } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [permissionStatus, setPermissionStatus] = useState(Notification.permission);
@@ -26,7 +26,7 @@ export default function Settings() {
     const fetchSettings = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${API_BASE}/settings`, {
+            const res = await axios.get(`${apiUrl}/settings`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.data.settings) {
@@ -50,7 +50,7 @@ export default function Settings() {
         setSaving(true);
         const token = localStorage.getItem('token');
         try {
-            await axios.patch(`${API_BASE}/settings`, settings, {
+            await axios.patch(`${apiUrl}/settings`, settings, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('設定を保存しました');
@@ -69,18 +69,18 @@ export default function Settings() {
         const token = localStorage.getItem('token');
         try {
             const [tasksRes, sessionsRes, wakeRes] = await Promise.all([
-                axios.get(`${API_BASE}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_BASE}/timer/sessions`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_BASE}/wake/history`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${apiUrl}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${apiUrl}/timer/sessions`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${apiUrl}/wake/history`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
 
-            await axios.post(`${API_BASE}/sync/push`, {
+            await axios.post(`${apiUrl}/sync/push`, {
                 tasks: tasksRes.data.tasks,
                 sessions: sessionsRes.data.sessions || [],
                 wakeLogs: wakeRes.data.history || []
             }, { headers: { Authorization: `Bearer ${token}` } });
 
-            await axios.get(`${API_BASE}/sync/pull`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.get(`${apiUrl}/sync/pull`, { headers: { Authorization: `Bearer ${token}` } });
 
             alert('クラウド同期が完了しました');
             fetchSettings();

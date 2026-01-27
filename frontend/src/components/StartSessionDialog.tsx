@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import './StartSessionDialog.css';
-
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Task {
     id: string;
@@ -18,6 +17,7 @@ interface StartSessionDialogProps {
 }
 
 export default function StartSessionDialog({ tasks, onClose, onStart }: StartSessionDialogProps) {
+    const { apiUrl } = useAuth();
     const [selectedTaskId, setSelectedTaskId] = useState('');
     const [mode, setMode] = useState<'stopwatch' | 'countdown'>('stopwatch');
     const [duration, setDuration] = useState('');
@@ -51,7 +51,7 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
         const token = localStorage.getItem('token');
 
         try {
-            await axios.post(`${API_BASE}/timer/start`, {
+            await axios.post(`${apiUrl}/timer/start`, {
                 taskId: selectedTaskId,
                 mode,
                 plannedDurationSec: mode === 'countdown' && duration ? parseInt(duration) * 60 : null,

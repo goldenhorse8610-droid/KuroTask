@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import ActiveSessionCard from '../components/ActiveSessionCard';
 import StartSessionDialog from '../components/StartSessionDialog';
 import './Home.css';
-
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface WakeLog {
     id: string;
@@ -25,6 +24,7 @@ interface Task {
 }
 
 export default function Home() {
+    const { apiUrl } = useAuth();
     const [loading, setLoading] = useState(true);
     const [activeSessions, setActiveSessions] = useState<any[]>([]);
     const [todayStats, setTodayStats] = useState({ totalMinutes: 0, completedCount: 0 });
@@ -43,31 +43,31 @@ export default function Home() {
         const token = localStorage.getItem('token');
         try {
             // 実行中セッション取得 (複数)
-            const sessionRes = await axios.get(`${API_BASE}/timer/current`, {
+            const sessionRes = await axios.get(`${apiUrl}/timer/current`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setActiveSessions(sessionRes.data.sessions || []);
 
             // 設定取得
-            const settingsRes = await axios.get(`${API_BASE}/settings`, {
+            const settingsRes = await axios.get(`${apiUrl}/settings`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSettings(settingsRes.data.settings);
 
             // 放置タスク取得
-            const idleRes = await axios.get(`${API_BASE}/idle-monitor/status`, {
+            const idleRes = await axios.get(`${apiUrl}/idle-monitor/status`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setIdleTasks(idleRes.data.idleTasks || []);
 
             // タスク一覧取得
-            const tasksRes = await axios.get(`${API_BASE}/tasks`, {
+            const tasksRes = await axios.get(`${apiUrl}/tasks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTasks(tasksRes.data.tasks);
 
             // 今日の起床記録取得
-            const wakeRes = await axios.get(`${API_BASE}/wake/today`, {
+            const wakeRes = await axios.get(`${apiUrl}/wake/today`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTodayWake(wakeRes.data.log);
@@ -88,7 +88,7 @@ export default function Home() {
         if (!task) return;
 
         try {
-            await axios.post(`${API_BASE}/timer/start`, {
+            await axios.post(`${apiUrl}/timer/start`, {
                 taskId: task.id,
                 mode: task.type === 'timer' ? 'countdown' : 'stopwatch',
                 plannedDurationSec: task.defaultTimerDurationSec,
@@ -111,7 +111,7 @@ export default function Home() {
         setRecordingWake(true);
 
         try {
-            const res = await axios.post(`${API_BASE}/wake`, {}, {
+            const res = await axios.post(`${apiUrl}/wake`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTodayWake(res.data.wakeLog);
@@ -138,7 +138,7 @@ export default function Home() {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${API_BASE}/wake/today`, {
+            await axios.delete(`${apiUrl}/wake/today`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchHomeData();

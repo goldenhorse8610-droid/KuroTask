@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Star } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import StartSessionDialog from '../components/StartSessionDialog';
 import MiniTimerDisplay from '../components/MiniTimerDisplay';
 import './Tasks.css';
-
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Task {
     id: string;
@@ -33,6 +32,7 @@ interface Session {
 }
 
 export default function Tasks() {
+    const { apiUrl } = useAuth();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
@@ -58,7 +58,7 @@ export default function Tasks() {
     const fetchTasks = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${API_BASE}/tasks`, {
+            const res = await axios.get(`${apiUrl}/tasks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTasks(res.data.tasks);
@@ -78,7 +78,7 @@ export default function Tasks() {
     const fetchActiveSessions = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${API_BASE}/timer/current`, {
+            const res = await axios.get(`${apiUrl}/timer/current`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setActiveSessions(res.data.sessions || []);
@@ -93,7 +93,7 @@ export default function Tasks() {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`${API_BASE}/timer/start`, {
+            await axios.post(`${apiUrl}/timer/start`, {
                 taskId: task.id,
                 mode: task.type === 'timer' ? 'countdown' : 'stopwatch',
                 plannedDurationSec: task.defaultTimerDurationSec,
@@ -157,11 +157,11 @@ export default function Tasks() {
 
         try {
             if (editingTask) {
-                await axios.patch(`${API_BASE}/tasks/${editingTask.id}`, data, {
+                await axios.patch(`${apiUrl}/tasks/${editingTask.id}`, data, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             } else {
-                await axios.post(`${API_BASE}/tasks`, data, {
+                await axios.post(`${apiUrl}/tasks`, data, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             }
@@ -176,7 +176,7 @@ export default function Tasks() {
     const handleToggleFavorite = async (taskId: string) => {
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`${API_BASE}/tasks/${taskId}/toggle-favorite`, {}, {
+            await axios.post(`${apiUrl}/tasks/${taskId}/toggle-favorite`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchTasks();
@@ -190,7 +190,7 @@ export default function Tasks() {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`${API_BASE}/tasks/${taskId}/archive`, {}, {
+            await axios.post(`${apiUrl}/tasks/${taskId}/archive`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchTasks();

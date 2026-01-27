@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import './Analytics.css';
 
-const API_BASE = `http://${window.location.hostname}:3000`;
-
 export default function Analytics() {
+    const { apiUrl } = useAuth();
     const [chartData, setChartData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -32,7 +32,7 @@ export default function Analytics() {
     const fetchMetadata = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${API_BASE}/tasks`, {
+            const res = await axios.get(`${apiUrl}/tasks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTasks(res.data.tasks);
@@ -52,7 +52,7 @@ export default function Analytics() {
             if (selectedTaskId !== 'all') params.append('taskId', selectedTaskId);
             if (selectedCategoryId !== 'all') params.append('categoryId', selectedCategoryId);
 
-            const res = await axios.get(`${API_BASE}/analytics/data?${params.toString()}`, {
+            const res = await axios.get(`${apiUrl}/analytics/data?${params.toString()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setChartData(res.data.chartData);

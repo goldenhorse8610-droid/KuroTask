@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import './Recurring.css';
-
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Task {
     id: string;
@@ -19,6 +18,7 @@ interface RecurringRule {
 }
 
 export default function Recurring() {
+    const { apiUrl } = useAuth();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [rules, setRules] = useState<RecurringRule[]>([]);
     const [loading, setLoading] = useState(true);
@@ -37,8 +37,8 @@ export default function Recurring() {
         const token = localStorage.getItem('token');
         try {
             const [tasksRes, rulesRes] = await Promise.all([
-                axios.get(`${API_BASE}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_BASE}/recurring`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${apiUrl}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${apiUrl}/recurring`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
             setTasks(tasksRes.data.tasks.filter((t: any) => t.type !== 'checklist'));
             setRules(rulesRes.data.rules);
@@ -55,7 +55,7 @@ export default function Recurring() {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`${API_BASE}/recurring`, {
+            await axios.post(`${apiUrl}/recurring`, {
                 taskId: selectedTaskId,
                 ruleType,
                 reminderEnabled,
@@ -74,7 +74,7 @@ export default function Recurring() {
         if (!confirm('この設定を解除しますか？')) return;
         const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${API_BASE}/recurring/${id}`, {
+            await axios.delete(`${apiUrl}/recurring/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchData();

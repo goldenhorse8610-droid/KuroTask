@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import { sendNotification } from '../utils/notifications';
 import './ActiveSessionCard.css';
-
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Session {
     id: string;
@@ -23,6 +22,7 @@ interface ActiveSessionCardProps {
 }
 
 export default function ActiveSessionCard({ session, settings, onStop }: ActiveSessionCardProps) {
+    const { apiUrl } = useAuth();
     const [tick, setTick] = useState(0);
     const [endMemo, setEndMemo] = useState('');
     const [stopping, setStopping] = useState(false);
@@ -135,7 +135,7 @@ export default function ActiveSessionCard({ session, settings, onStop }: ActiveS
         const token = localStorage.getItem('token');
 
         try {
-            await axios.post(`${API_BASE}/timer/stop`, {
+            await axios.post(`${apiUrl}/timer/stop`, {
                 endMemo: endMemo || null,
             }, {
                 headers: { Authorization: `Bearer ${token}` }
