@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { requestNotificationPermission } from '../utils/notifications';
 import './Settings.css';
 
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 export default function Settings() {
+    const { apiUrl } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [permissionStatus, setPermissionStatus] = useState(Notification.permission);
@@ -26,7 +27,7 @@ export default function Settings() {
     const fetchSettings = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${API_BASE}/settings`, {
+            const res = await axios.get(`${apiUrl}/settings`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.data.settings) {
@@ -50,7 +51,7 @@ export default function Settings() {
         setSaving(true);
         const token = localStorage.getItem('token');
         try {
-            await axios.patch(`${API_BASE}/settings`, settings, {
+            await axios.patch(`${apiUrl}/settings`, settings, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('設定を保存しました');
@@ -69,24 +70,24 @@ export default function Settings() {
         const token = localStorage.getItem('token');
         try {
             const [tasksRes, sessionsRes, wakeRes] = await Promise.all([
-                axios.get(`${API_BASE}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_BASE}/timer/sessions`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_BASE}/wake/history`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${apiUrl}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${apiUrl}/timer/sessions`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${apiUrl}/wake/history`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
 
-            await axios.post(`${API_BASE}/sync/push`, {
+            await axios.post(`${apiUrl}/sync/push`, {
                 tasks: tasksRes.data.tasks,
                 sessions: sessionsRes.data.sessions || [],
                 wakeLogs: wakeRes.data.history || []
             }, { headers: { Authorization: `Bearer ${token}` } });
 
-            await axios.get(`${API_BASE}/sync/pull`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.get(`${apiUrl}/sync/pull`, { headers: { Authorization: `Bearer ${token}` } });
 
-            alert('クラウド同期が完了しました');
+            alert('クラウド同期が完亁E��ました');
             fetchSettings();
         } catch (error) {
             console.error('Sync failed:', error);
-            alert('同期に失敗しました。サーバーが起動しているか確認してください。');
+            alert('同期に失敗しました。サーバ�Eが起動してぁE��か確認してください、E);
         } finally {
             setSyncLoading(false);
         }
@@ -98,7 +99,7 @@ export default function Settings() {
         if (granted) {
             alert('通知が許可されました');
         } else {
-            alert('通知が許可されませんでした。ブラウザの設定を確認してください。');
+            alert('通知が許可されませんでした。ブラウザの設定を確認してください、E);
         }
     };
 
@@ -109,16 +110,16 @@ export default function Settings() {
             <h1 className="page-title">Settings</h1>
 
             <div className="settings-section">
-                <h3>通知設定</h3>
+                <h3>通知設宁E/h3>
                 <div className="settings-card">
                     <div className="setting-item">
                         <div className="setting-info">
                             <span className="setting-label">ブラウザ通知</span>
-                            <p className="setting-description">タイマー終了時や経過時間をお知らせします</p>
+                            <p className="setting-description">タイマ�E終亁E��めE��過時間をお知らせしまぁE/p>
                         </div>
                         <div className="setting-action">
                             {permissionStatus === 'granted' ? (
-                                <span className="status-tag success">許可済み ✓</span>
+                                <span className="status-tag success">許可済み ✁E/span>
                             ) : (
                                 <button className="secondary sm" onClick={handleRequestPermission}>
                                     通知を許可する
@@ -129,8 +130,8 @@ export default function Settings() {
 
                     <div className="setting-item">
                         <div className="setting-info">
-                            <span className="setting-label">経過時間の通知（分）</span>
-                            <p className="setting-description">計測中、指定した分数が経過するたびに通知します</p>
+                            <span className="setting-label">経過時間の通知�E��E�E�E/span>
+                            <p className="setting-description">計測中、指定した�E数が経過するた�Eに通知しまぁE/p>
                         </div>
                         <div className="setting-action">
                             <input
@@ -146,7 +147,7 @@ export default function Settings() {
                     <div className="setting-item">
                         <div className="setting-info">
                             <span className="setting-label">通知を繰り返す</span>
-                            <p className="setting-description">一度だけでなく、毎回通知します</p>
+                            <p className="setting-description">一度だけでなく、毎回通知しまぁE/p>
                         </div>
                         <div className="setting-action">
                             <input
@@ -160,12 +161,12 @@ export default function Settings() {
             </div>
 
             <div className="settings-section">
-                <h3>放置監視設定</h3>
+                <h3>放置監視設宁E/h3>
                 <div className="settings-card">
                     <div className="setting-item">
                         <div className="setting-info">
-                            <span className="setting-label">放置しきい値（日数）</span>
-                            <p className="setting-description">指定した日数以上計測がないタスクをHomeでリマインドします</p>
+                            <span className="setting-label">放置しきぁE���E�日数�E�E/span>
+                            <p className="setting-description">持E��した日数以上計測がなぁE��スクをHomeでリマインドしまぁE/p>
                         </div>
                         <div className="setting-action">
                             <input
@@ -181,12 +182,12 @@ export default function Settings() {
             </div>
 
             <div className="settings-section">
-                <h3>起床・サイレント設定</h3>
+                <h3>起床�Eサイレント設宁E/h3>
                 <div className="settings-card">
                     <div className="setting-item">
                         <div className="setting-info">
-                            <span className="setting-label">起床警告時間</span>
-                            <p className="setting-description">この時間を過ぎて起床記録すると警告を表示します</p>
+                            <span className="setting-label">起床警告時閁E/span>
+                            <p className="setting-description">こ�E時間を過ぎて起床記録すると警告を表示しまぁE/p>
                         </div>
                         <div className="setting-action">
                             <input
@@ -199,7 +200,7 @@ export default function Settings() {
 
                     <div className="setting-item">
                         <div className="setting-info">
-                            <span className="setting-label">おやすみモード（開始）</span>
+                            <span className="setting-label">おやすみモード（開始！E/span>
                         </div>
                         <div className="setting-action">
                             <input
@@ -212,7 +213,7 @@ export default function Settings() {
 
                     <div className="setting-item">
                         <div className="setting-info">
-                            <span className="setting-label">おやすみモード（終了）</span>
+                            <span className="setting-label">おやすみモード（終亁E��E/span>
                         </div>
                         <div className="setting-action">
                             <input
@@ -226,14 +227,14 @@ export default function Settings() {
             </div>
 
             <div className="settings-section">
-                <h3>クラウド同期 (方式①)</h3>
+                <h3>クラウド同朁E(方式①)</h3>
                 <div className="settings-card">
                     <div className="setting-item">
                         <div className="setting-info">
-                            <span className="setting-label">一括マージ実行</span>
+                            <span className="setting-label">一括マ�Eジ実衁E/span>
                             <p className="setting-description">
-                                スマホでの記録をこのPCへ同期、またはPCの記録をクラウドへ預けます。<br />
-                                <small>※PCがスリープ中はスマホから同期できません。PC起動時に一括でマージしてください。</small>
+                                スマ�Eでの記録をこのPCへ同期、また�EPCの記録をクラウドへ預けます、Ebr />
+                                <small>※PCがスリープ中はスマ�Eから同期できません。PC起動時に一括でマ�Eジしてください、E/small>
                             </p>
                         </div>
                         <div className="setting-action">
@@ -242,7 +243,7 @@ export default function Settings() {
                                 onClick={handleSync}
                                 disabled={syncLoading}
                             >
-                                {syncLoading ? '同期中...' : '最新の状態にする (1クリック同期)'}
+                                {syncLoading ? '同期中...' : '最新の状態にする (1クリチE��同期)'}
                             </button>
                         </div>
                     </div>
@@ -251,7 +252,7 @@ export default function Settings() {
 
             <div className="settings-actions">
                 <button className="primary lg" onClick={handleSave} disabled={saving}>
-                    {saving ? '保存中...' : '設定を保存'}
+                    {saving ? '保存中...' : '設定を保孁E}
                 </button>
             </div>
         </div>

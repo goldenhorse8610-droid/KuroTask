@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import './History.css';
 
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Session {
     id: string;
@@ -20,12 +20,13 @@ interface Session {
 }
 
 export default function History() {
+    const { apiUrl } = useAuth();
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    // 編集モーダル用
+    // 編雁E��ーダル用
     const [editingSession, setEditingSession] = useState<Session | null>(null);
     const [editEndMemo, setEditEndMemo] = useState('');
 
@@ -37,7 +38,7 @@ export default function History() {
         const token = localStorage.getItem('token');
         setLoading(true);
         try {
-            const res = await axios.get(`${API_BASE}/timer/history?page=${page}&limit=20`, {
+            const res = await axios.get(`${apiUrl}/timer/history?page=${page}&limit=20`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSessions(res.data.sessions);
@@ -50,10 +51,10 @@ export default function History() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('この記録を削除しますか？')) return;
+        if (!confirm('こ�E記録を削除しますか�E�E)) return;
         const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${API_BASE}/timer/sessions/${id}`, {
+            await axios.delete(`${apiUrl}/timer/sessions/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchHistory();
@@ -66,7 +67,7 @@ export default function History() {
         if (!editingSession) return;
         const token = localStorage.getItem('token');
         try {
-            await axios.patch(`${API_BASE}/timer/sessions/${editingSession.id}`, {
+            await axios.patch(`${apiUrl}/timer/sessions/${editingSession.id}`, {
                 endMemo: editEndMemo
             }, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -106,19 +107,19 @@ export default function History() {
                             <div className="history-header">
                                 <div className="history-task-info">
                                     <span className="history-task-name">{s.task.name}</span>
-                                    <span className="history-category-badge">{s.task.category || '未分類'}</span>
+                                    <span className="history-category-badge">{s.task.category || '未刁E��E}</span>
                                 </div>
                                 <div className="history-actions">
                                     <button className="edit-btn sm" onClick={() => {
                                         setEditingSession(s);
                                         setEditEndMemo(s.endMemo || '');
-                                    }}>編集</button>
+                                    }}>編雁E/button>
                                     <button className="delete-btn danger sm" onClick={() => handleDelete(s.id)}>削除</button>
                                 </div>
                             </div>
                             <div className="history-details">
                                 <div className="detail-item">
-                                    <span className="detail-label">日時:</span>
+                                    <span className="detail-label">日晁E</span>
                                     <span>{formatDate(s.startAt)}</span>
                                 </div>
                                 <div className="detail-item">
@@ -127,7 +128,7 @@ export default function History() {
                                 </div>
                                 <div className="detail-item full">
                                     <span className="detail-label">メモ:</span>
-                                    <p className="history-memo">{s.endMemo || (s.startMemo ? s.startMemo : <span className="no-memo">なし</span>)}</p>
+                                    <p className="history-memo">{s.endMemo || (s.startMemo ? s.startMemo : <span className="no-memo">なぁE/span>)}</p>
                                 </div>
                             </div>
                         </div>
@@ -143,20 +144,20 @@ export default function History() {
                 </div>
             )}
 
-            {/* 編集モーダル */}
+            {/* 編雁E��ーダル */}
             {editingSession && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <h3>メモを編集</h3>
+                        <h3>メモを編雁E/h3>
                         <textarea
                             value={editEndMemo}
                             onChange={(e) => setEditEndMemo(e.target.value)}
                             rows={4}
-                            placeholder="終了メモを入力"
+                            placeholder="終亁E��モを�E劁E
                         />
                         <div className="modal-actions">
                             <button className="secondary" onClick={() => setEditingSession(null)}>キャンセル</button>
-                            <button className="primary" onClick={handleUpdateMemo}>保存</button>
+                            <button className="primary" onClick={handleUpdateMemo}>保孁E/button>
                         </div>
                     </div>
                 </div>

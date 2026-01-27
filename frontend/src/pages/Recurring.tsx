@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import './Recurring.css';
 
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Task {
     id: string;
@@ -19,6 +19,7 @@ interface RecurringRule {
 }
 
 export default function Recurring() {
+    const { apiUrl } = useAuth();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [rules, setRules] = useState<RecurringRule[]>([]);
     const [loading, setLoading] = useState(true);
@@ -37,8 +38,8 @@ export default function Recurring() {
         const token = localStorage.getItem('token');
         try {
             const [tasksRes, rulesRes] = await Promise.all([
-                axios.get(`${API_BASE}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_BASE}/recurring`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${apiUrl}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${apiUrl}/recurring`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
             setTasks(tasksRes.data.tasks.filter((t: any) => t.type !== 'checklist'));
             setRules(rulesRes.data.rules);
@@ -55,7 +56,7 @@ export default function Recurring() {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`${API_BASE}/recurring`, {
+            await axios.post(`${apiUrl}/recurring`, {
                 taskId: selectedTaskId,
                 ruleType,
                 reminderEnabled,
@@ -71,10 +72,10 @@ export default function Recurring() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('この設定を解除しますか？')) return;
+        if (!confirm('こ�E設定を解除しますか�E�E)) return;
         const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${API_BASE}/recurring/${id}`, {
+            await axios.delete(`${apiUrl}/recurring/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchData();
@@ -95,7 +96,7 @@ export default function Recurring() {
                         <h3>繰り返し設定を追加</h3>
                         <form onSubmit={handleSave}>
                             <div className="form-group">
-                                <label>タスクを選択</label>
+                                <label>タスクを選抁E/label>
                                 <select
                                     value={selectedTaskId}
                                     onChange={(e) => setSelectedTaskId(e.target.value)}
@@ -139,7 +140,7 @@ export default function Recurring() {
                             )}
 
                             <button type="submit" className="primary full-width" disabled={!selectedTaskId}>
-                                設定を保存
+                                設定を保孁E
                             </button>
                         </form>
                     </div>
@@ -148,7 +149,7 @@ export default function Recurring() {
                 <div className="rules-list-section">
                     <h3>現在の設定一覧</h3>
                     {rules.length === 0 ? (
-                        <div className="empty-rules">設定されているタスクはありません</div>
+                        <div className="empty-rules">設定されてぁE��タスクはありません</div>
                     ) : (
                         <div className="rules-grid">
                             {rules.map(rule => (
@@ -161,7 +162,7 @@ export default function Recurring() {
                                         {rule.reminderEnabled ? (
                                             <span className="reminder-time">🔔 {rule.reminderStartTime}</span>
                                         ) : (
-                                            <span className="reminder-off">通知なし</span>
+                                            <span className="reminder-off">通知なぁE/span>
                                         )}
                                     </div>
                                     <button
