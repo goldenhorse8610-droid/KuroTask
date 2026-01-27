@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import ActiveSessionCard from '../components/ActiveSessionCard';
 import StartSessionDialog from '../components/StartSessionDialog';
 import './Home.css';
 
+const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface WakeLog {
     id: string;
@@ -25,7 +25,6 @@ interface Task {
 }
 
 export default function Home() {
-    const { apiUrl } = useAuth();
     const [loading, setLoading] = useState(true);
     const [activeSessions, setActiveSessions] = useState<any[]>([]);
     const [todayStats, setTodayStats] = useState({ totalMinutes: 0, completedCount: 0 });
@@ -43,37 +42,37 @@ export default function Home() {
     const fetchHomeData = async () => {
         const token = localStorage.getItem('token');
         try {
-            // 実行中セチE��ョン取征E(褁E��)
-            const sessionRes = await axios.get(`${apiUrl}/timer/current`, {
+            // 実行中セッション取得 (複数)
+            const sessionRes = await axios.get(`${API_BASE}/timer/current`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setActiveSessions(sessionRes.data.sessions || []);
 
-            // 設定取征E
-            const settingsRes = await axios.get(`${apiUrl}/settings`, {
+            // 設定取得
+            const settingsRes = await axios.get(`${API_BASE}/settings`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSettings(settingsRes.data.settings);
 
-            // 放置タスク取征E
-            const idleRes = await axios.get(`${apiUrl}/idle-monitor/status`, {
+            // 放置タスク取得
+            const idleRes = await axios.get(`${API_BASE}/idle-monitor/status`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setIdleTasks(idleRes.data.idleTasks || []);
 
-            // タスク一覧取征E
-            const tasksRes = await axios.get(`${apiUrl}/tasks`, {
+            // タスク一覧取得
+            const tasksRes = await axios.get(`${API_BASE}/tasks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTasks(tasksRes.data.tasks);
 
-            // 今日の起床記録取征E
-            const wakeRes = await axios.get(`${apiUrl}/wake/today`, {
+            // 今日の起床記録取得
+            const wakeRes = await axios.get(`${API_BASE}/wake/today`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTodayWake(wakeRes.data.log);
 
-            // 今日の統訁E
+            // 今日の統計
             setTodayStats({ totalMinutes: 0, completedCount: 0 });
 
             setLoading(false);
@@ -89,7 +88,7 @@ export default function Home() {
         if (!task) return;
 
         try {
-            await axios.post(`${apiUrl}/timer/start`, {
+            await axios.post(`${API_BASE}/timer/start`, {
                 taskId: task.id,
                 mode: task.type === 'timer' ? 'countdown' : 'stopwatch',
                 plannedDurationSec: task.defaultTimerDurationSec,
@@ -100,9 +99,9 @@ export default function Home() {
         } catch (error: any) {
             console.error('Failed to start session:', error);
             if (error.response?.data?.error === 'Already running' || error.response?.data?.error === 'Task already running') {
-                alert('既に実行中のセチE��ョンがあります、E);
+                alert('既に実行中のセッションがあります。');
             } else {
-                alert('セチE��ョンの開始に失敗しました');
+                alert('セッションの開始に失敗しました');
             }
         }
     };
@@ -112,18 +111,18 @@ export default function Home() {
         setRecordingWake(true);
 
         try {
-            const res = await axios.post(`${apiUrl}/wake`, {}, {
+            const res = await axios.post(`${API_BASE}/wake`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTodayWake(res.data.wakeLog);
 
             if (res.data.wakeLog.warned) {
-                alert('⚠�E�E10時を過ぎてぁE��す！E);
+                alert('⚠️ 10時を過ぎています！');
             }
         } catch (error: any) {
             console.error('Failed to record wake:', error);
             if (error.response?.data?.error === 'Already recorded today') {
-                alert('今日はすでに記録済みでぁE);
+                alert('今日はすでに記録済みです');
             } else {
                 alert('起床記録に失敗しました');
             }
@@ -133,19 +132,19 @@ export default function Home() {
     };
 
     const handleResetWake = async () => {
-        if (!window.confirm('起床記録をリセチE��します。本当に記録をやり直しますか�E�E)) {
+        if (!window.confirm('起床記録をリセットします。本当に記録をやり直しますか？')) {
             return;
         }
 
         const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${apiUrl}/wake/today`, {
+            await axios.delete(`${API_BASE}/wake/today`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchHomeData();
         } catch (error) {
             console.error('Failed to reset wake log:', error);
-            alert('リセチE��に失敗しました');
+            alert('リセットに失敗しました');
         }
     };
 
@@ -168,12 +167,12 @@ export default function Home() {
                 <h1 className="page-title">Home</h1>
                 {tasks.filter(t => t.type !== 'checklist').length > 0 && (
                     <button className="start-session-btn primary" onClick={() => setShowStartDialog(true)}>
-                        ▶ 計測開姁E
+                        ▶ 計測開始
                     </button>
                 )}
             </div>
 
-            {/* (1) 実行中セチE��ョンカーチE(褁E��表示対忁E */}
+            {/* (1) 実行中セッションカード (複数表示対応) */}
             <div className="active-sessions-list">
                 {activeSessions.length > 0 ? (
                     activeSessions.map(session => (
@@ -186,30 +185,30 @@ export default function Home() {
                     ))
                 ) : (
                     <div className="session-placeholder">
-                        <p>現在実行中のセチE��ョンはありません</p>
-                        <p className="hint">「▶ 計測開始」また�E Tasksから開始できまぁE/p>
+                        <p>現在実行中のセッションはありません</p>
+                        <p className="hint">「▶ 計測開始」または Tasksから開始できます</p>
                     </div>
                 )}
             </div>
 
             <div className="home-grid">
-                {/* (2) 起床�Eタン */}
+                {/* (2) 起床ボタン */}
                 <div className={`card wake-card ${todayWake?.warned ? 'warned' : ''}`}>
                     <h3>起床記録</h3>
                     {todayWake ? (
                         <>
                             <div className="wake-recorded">
                                 <span className="wake-time">{formatWakeTime(todayWake.wakeAt)}</span>
-                                <span className="wake-status">記録済み ✁E/span>
+                                <span className="wake-status">記録済み ✓</span>
                                 <button
                                     className="reset-wake-btn"
                                     onClick={handleResetWake}
                                 >
-                                    記録をやり直ぁE
+                                    記録をやり直す
                                 </button>
                             </div>
                             {todayWake.warned && (
-                                <p className="wake-warning">⚠�E�E10時趁E��</p>
+                                <p className="wake-warning">⚠️ 10時超え</p>
                             )}
                         </>
                     ) : (
@@ -219,7 +218,7 @@ export default function Home() {
                                 onClick={handleRecordWake}
                                 disabled={recordingWake}
                             >
-                                {recordingWake ? '記録中...' : '起庁E}
+                                {recordingWake ? '記録中...' : '起床'}
                             </button>
                             <p className="wake-hint">今日の起床時刻を記録</p>
                         </>
@@ -231,37 +230,37 @@ export default function Home() {
                     <h3>今日の勝ち</h3>
                     <div className="stat-item">
                         <span className="stat-label">計測時間</span>
-                        <span className="stat-value">{todayStats.totalMinutes}刁E/span>
+                        <span className="stat-value">{todayStats.totalMinutes}分</span>
                     </div>
                     <div className="stat-item">
-                        <span className="stat-label">完亁E/span>
+                        <span className="stat-label">完了</span>
                         <span className="stat-value">{todayStats.completedCount}件</span>
                     </div>
                 </div>
             </div>
 
-            {/* (4) 放置タスクリマインチE*/}
+            {/* (4) 放置タスクリマインド */}
             {idleTasks.length > 0 && (
                 <div className="idle-reminders-section">
-                    <h3>し�EらくめE��てぁE��ぁE��スク</h3>
+                    <h3>しばらくやっていないタスク</h3>
                     <div className="idle-grid">
                         {idleTasks.map(task => (
                             <div key={task.id} className="idle-task-card" onClick={() => handleStartTask(task.id)}>
-                                <span className="idle-warning-icon">⚠�E�E/span>
+                                <span className="idle-warning-icon">⚠️</span>
                                 <div className="idle-task-info">
                                     <span className="idle-task-name">{task.name}</span>
-                                    <span className="idle-task-days">最征E {new Date(task.lastActive).toLocaleDateString()}</span>
+                                    <span className="idle-task-days">最後: {new Date(task.lastActive).toLocaleDateString()}</span>
                                 </div>
-                                <button className="idle-start-btn">開姁E/button>
+                                <button className="idle-start-btn">開始</button>
                             </div>
                         ))}
                     </div>
                 </div>
             )}
 
-            {/* (5) よく使ぁE��スク */}
+            {/* (5) よく使うタスク */}
             <div className="shortcuts-section">
-                <h3>よく使ぁE��スク</h3>
+                <h3>よく使うタスク</h3>
                 {favoriteTasks.length > 0 ? (
                     <div className="favorite-grid">
                         {favoriteTasks.map(task => {
@@ -280,8 +279,8 @@ export default function Home() {
                     </div>
                 ) : (
                     <div className="shortcuts-placeholder">
-                        <p>お気に入り�Eタスクがありません</p>
-                        <p className="hint">Tasksタブで ☁EをクリチE��して登録してください</p>
+                        <p>お気に入りのタスクがありません</p>
+                        <p className="hint">Tasksタブで ☆ をクリックして登録してください</p>
                     </div>
                 )}
             </div>

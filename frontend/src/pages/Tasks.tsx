@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Star } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 import StartSessionDialog from '../components/StartSessionDialog';
 import MiniTimerDisplay from '../components/MiniTimerDisplay';
 import './Tasks.css';
+
+const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Task {
     id: string;
@@ -32,7 +33,6 @@ interface Session {
 }
 
 export default function Tasks() {
-    const { apiUrl } = useAuth();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
@@ -41,7 +41,7 @@ export default function Tasks() {
     const [showStartDialog, setShowStartDialog] = useState(false);
     const [activeSessions, setActiveSessions] = useState<Session[]>([]);
 
-    // フォーム状慁E
+    // フォーム状態
     const [formName, setFormName] = useState('');
     const [formType, setFormType] = useState<'stopwatch' | 'timer' | 'checklist'>('stopwatch');
     const [formCategory, setFormCategory] = useState('');
@@ -58,12 +58,12 @@ export default function Tasks() {
     const fetchTasks = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`\/tasks`, {
+            const res = await axios.get(`${API_BASE}/tasks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTasks(res.data.tasks);
 
-            // カチE��リ抽出
+            // カテゴリ抽出
             const uniqueCategories = Array.from(
                 new Set(res.data.tasks.map((t: Task) => t.category).filter(Boolean))
             ) as string[];
@@ -78,7 +78,7 @@ export default function Tasks() {
     const fetchActiveSessions = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`\/timer/current`, {
+            const res = await axios.get(`${API_BASE}/timer/current`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setActiveSessions(res.data.sessions || []);
@@ -93,7 +93,7 @@ export default function Tasks() {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`\/timer/start`, {
+            await axios.post(`${API_BASE}/timer/start`, {
                 taskId: task.id,
                 mode: task.type === 'timer' ? 'countdown' : 'stopwatch',
                 plannedDurationSec: task.defaultTimerDurationSec,
@@ -105,7 +105,7 @@ export default function Tasks() {
         } catch (error: any) {
             console.error('Failed to start task:', error);
             if (error.response?.data?.error === 'Task already running') {
-                alert('こ�Eタスクは既に実行中でぁE);
+                alert('このタスクは既に実行中です');
             } else {
                 alert('開始に失敗しました');
             }
@@ -157,11 +157,11 @@ export default function Tasks() {
 
         try {
             if (editingTask) {
-                await axios.patch(`\/tasks/${editingTask.id}`, data, {
+                await axios.patch(`${API_BASE}/tasks/${editingTask.id}`, data, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             } else {
-                await axios.post(`\/tasks`, data, {
+                await axios.post(`${API_BASE}/tasks`, data, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             }
@@ -176,7 +176,7 @@ export default function Tasks() {
     const handleToggleFavorite = async (taskId: string) => {
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`\/tasks/${taskId}/toggle-favorite`, {}, {
+            await axios.post(`${API_BASE}/tasks/${taskId}/toggle-favorite`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchTasks();
@@ -186,11 +186,11 @@ export default function Tasks() {
     };
 
     const handleArchive = async (taskId: string) => {
-        if (!confirm('こ�Eタスクをアーカイブしますか�E�E)) return;
+        if (!confirm('このタスクをアーカイブしますか？')) return;
 
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`\/tasks/${taskId}/archive`, {}, {
+            await axios.post(`${API_BASE}/tasks/${taskId}/archive`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchTasks();
@@ -202,9 +202,9 @@ export default function Tasks() {
 
     const getTaskTypeLabel = (type: string) => {
         switch (type) {
-            case 'stopwatch': return '⏱�E�EストップウォチE��';
-            case 'timer': return '⏰ タイマ�E';
-            case 'checklist': return '✁EチェチE��';
+            case 'stopwatch': return '⏱️ ストップウォッチ';
+            case 'timer': return '⏰ タイマー';
+            case 'checklist': return '✓ チェック';
             default: return type;
         }
     };
@@ -218,14 +218,14 @@ export default function Tasks() {
             <div className="tasks-header">
                 <h1 className="page-title">Tasks</h1>
                 <button className="create-button primary" onClick={openCreateModal}>
-                    �E�Eタスク作�E
+                    ＋ タスク作成
                 </button>
             </div>
 
             {tasks.length === 0 ? (
                 <div className="empty-state">
                     <p>まだタスクがありません</p>
-                    <p className="hint">「！Eタスク作�E」から追加してください</p>
+                    <p className="hint">「＋ タスク作成」から追加してください</p>
                 </div>
             ) : (
                 <div className="tasks-grid">
@@ -258,7 +258,7 @@ export default function Tasks() {
                                 )}
                                 {task.type === 'timer' && task.defaultTimerDurationSec && (
                                     <p className="task-detail">
-                                        チE��ォルチE {task.defaultTimerDurationSec / 60}刁E
+                                        デフォルト: {task.defaultTimerDurationSec / 60}分
                                     </p>
                                 )}
                                 {isRunning ? (
@@ -273,7 +273,7 @@ export default function Tasks() {
                                 ) : (
                                     (task.type === 'stopwatch' || task.type === 'timer') && (
                                         <p className="task-time">
-                                            {task.totalMinutes || 0}刁E
+                                            {task.totalMinutes || 0}分
                                         </p>
                                     )
                                 )}
@@ -284,14 +284,14 @@ export default function Tasks() {
                                             onClick={() => handleStartTask(task.id)}
                                             disabled={isRunning}
                                         >
-                                            ▶ 開姁E
+                                            ▶ 開始
                                         </button>
                                     )}
                                     <button className="edit-btn secondary" onClick={() => openEditModal(task)}>
-                                        編雁E
+                                        編集
                                     </button>
                                     <button className="archive-btn danger" onClick={() => handleArchive(task.id)}>
-                                        アーカイチE
+                                        アーカイブ
                                     </button>
                                 </div>
                             </div>
@@ -300,14 +300,14 @@ export default function Tasks() {
                 </div>
             )}
 
-            {/* タスク作�E/編雁E��ーダル */}
+            {/* タスク作成/編集モーダル */}
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2>{editingTask ? 'タスク編雁E : 'タスク作�E'}</h2>
+                        <h2>{editingTask ? 'タスク編集' : 'タスク作成'}</h2>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
-                                <label>タスク吁E*</label>
+                                <label>タスク名 *</label>
                                 <input
                                     type="text"
                                     value={formName}
@@ -320,24 +320,24 @@ export default function Tasks() {
                             <div className="form-group">
                                 <label>種別 *</label>
                                 <select value={formType} onChange={(e) => setFormType(e.target.value as any)} disabled={!!editingTask}>
-                                    <option value="stopwatch">ストップウォチE��計測</option>
-                                    <option value="timer">タイマ�E計測</option>
-                                    <option value="checklist">チェチE��リスチE/option>
+                                    <option value="stopwatch">ストップウォッチ計測</option>
+                                    <option value="timer">タイマー計測</option>
+                                    <option value="checklist">チェックリスト</option>
                                 </select>
                             </div>
 
                             <div className="form-group">
-                                <label>カチE��リ</label>
+                                <label>カテゴリ</label>
                                 {!showNewCategory && categories.length > 0 ? (
                                     <div className="category-selector">
                                         <select value={formCategory} onChange={(e) => setFormCategory(e.target.value)}>
-                                            <option value="">カチE��リなぁE/option>
+                                            <option value="">カテゴリなし</option>
                                             {categories.map((cat) => (
                                                 <option key={cat} value={cat}>{cat}</option>
                                             ))}
                                         </select>
                                         <button type="button" className="new-category-btn" onClick={() => setShowNewCategory(true)}>
-                                            �E�新要E
+                                            ＋新規
                                         </button>
                                     </div>
                                 ) : (
@@ -346,11 +346,11 @@ export default function Tasks() {
                                             type="text"
                                             value={formCategory}
                                             onChange={(e) => setFormCategory(e.target.value)}
-                                            placeholder="新しいカチE��リ吁E
+                                            placeholder="新しいカテゴリ名"
                                         />
                                         {categories.length > 0 && (
                                             <button type="button" className="cancel-new-btn" onClick={() => setShowNewCategory(false)}>
-                                                既存から選抁E
+                                                既存から選択
                                             </button>
                                         )}
                                     </div>
@@ -362,7 +362,7 @@ export default function Tasks() {
                                 <textarea
                                     value={formMemo}
                                     onChange={(e) => setFormMemo(e.target.value)}
-                                    placeholder="こ�Eタスクの詳細めE��皁E��記�E"
+                                    placeholder="このタスクの詳細や目的を記入"
                                     rows={3}
                                 />
                             </div>
@@ -376,13 +376,13 @@ export default function Tasks() {
                                                 checked={formIdleMonitor}
                                                 onChange={(e) => setFormIdleMonitor(e.target.checked)}
                                             />
-                                            放置監視を有効匁E
+                                            放置監視を有効化
                                         </label>
                                     </div>
 
                                     {formType === 'timer' && (
                                         <div className="form-group">
-                                            <label>チE��ォルトタイマ�E時間�E��E�E�E/label>
+                                            <label>デフォルトタイマー時間（分）</label>
                                             <input
                                                 type="number"
                                                 value={formDefaultDuration}
@@ -400,7 +400,7 @@ export default function Tasks() {
                                     キャンセル
                                 </button>
                                 <button type="submit" className="primary">
-                                    {editingTask ? '更新' : '作�E'}
+                                    {editingTask ? '更新' : '作成'}
                                 </button>
                             </div>
                         </form>

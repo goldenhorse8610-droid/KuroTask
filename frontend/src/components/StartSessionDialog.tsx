@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import './StartSessionDialog.css';
 
+const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Task {
     id: string;
@@ -30,7 +30,7 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
         setSelectedTaskId(taskId);
         const task = tasks.find(t => t.id === taskId);
 
-        // タスクタイプに応じてモード設宁E
+        // タスクタイプに応じてモード設定
         if (task?.type === 'timer' && task.defaultTimerDurationSec) {
             setMode('countdown');
             setDuration((task.defaultTimerDurationSec / 60).toString());
@@ -51,7 +51,7 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
         const token = localStorage.getItem('token');
 
         try {
-            await axios.post(`${apiUrl}/timer/start`, {
+            await axios.post(`${API_BASE}/timer/start`, {
                 taskId: selectedTaskId,
                 mode,
                 plannedDurationSec: mode === 'countdown' && duration ? parseInt(duration) * 60 : null,
@@ -65,9 +65,9 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
         } catch (error: any) {
             console.error('Failed to start session:', error);
             if (error.response?.data?.error === 'Already running') {
-                alert('既に実行中のセチE��ョンがあります。�Eに終亁E��てください、E);
+                alert('既に実行中のセッションがあります。先に終了してください。');
             } else {
-                alert('セチE��ョンの開始に失敗しました');
+                alert('セッションの開始に失敗しました');
             }
         } finally {
             setLoading(false);
@@ -77,7 +77,7 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content start-dialog" onClick={(e) => e.stopPropagation()}>
-                <h2>計測開姁E/h2>
+                <h2>計測開始</h2>
                 <form onSubmit={handleStart}>
                     <div className="form-group">
                         <label>タスク *</label>
@@ -87,17 +87,17 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
                             required
                             autoFocus
                         >
-                            <option value="">タスクを選抁E/option>
+                            <option value="">タスクを選択</option>
                             {tasks.filter(t => t.type !== 'checklist').map((task) => (
                                 <option key={task.id} value={task.id}>
-                                    {task.name} ({task.type === 'timer' ? 'タイマ�E' : 'ストップウォチE��'})
+                                    {task.name} ({task.type === 'timer' ? 'タイマー' : 'ストップウォッチ'})
                                 </option>
                             ))}
                         </select>
                     </div>
 
                     <div className="form-group">
-                        <label>モーチE*</label>
+                        <label>モード *</label>
                         <div className="mode-selector">
                             <button
                                 type="button"
@@ -105,7 +105,7 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
                                 onClick={() => setMode('stopwatch')}
                                 disabled={selectedTask?.type === 'timer'}
                             >
-                                ⏱�E�EストップウォチE��
+                                ⏱️ ストップウォッチ
                             </button>
                             <button
                                 type="button"
@@ -113,14 +113,14 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
                                 onClick={() => setMode('countdown')}
                                 disabled={selectedTask?.type === 'stopwatch'}
                             >
-                                ⏰ タイマ�E
+                                ⏰ タイマー
                             </button>
                         </div>
                     </div>
 
                     {mode === 'countdown' && (
                         <div className="form-group">
-                            <label>タイマ�E時間�E��E�E�E*</label>
+                            <label>タイマー時間（分） *</label>
                             <input
                                 type="number"
                                 value={duration}
@@ -137,7 +137,7 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
                         <textarea
                             value={startMemo}
                             onChange={(e) => setStartMemo(e.target.value)}
-                            placeholder="こ�E計測の目皁E��メモ"
+                            placeholder="この計測の目的やメモ"
                             rows={3}
                         />
                     </div>
@@ -147,7 +147,7 @@ export default function StartSessionDialog({ tasks, onClose, onStart }: StartSes
                             キャンセル
                         </button>
                         <button type="submit" className="primary" disabled={loading}>
-                            {loading ? '開始中...' : '開姁E}
+                            {loading ? '開始中...' : '開始'}
                         </button>
                     </div>
                 </form>

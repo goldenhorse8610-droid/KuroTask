@@ -25,14 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const [apiUrl, setApiUrl] = useState(() => {
         const saved = localStorage.getItem('kurotask_api_url');
-        if (saved) return saved;
-
-        // Auto-detect environment
-        const hostname = window.location.hostname;
-        if (hostname === 'kuro-task-wcmu.vercel.app' || hostname.includes('vercel.app')) {
-            return 'https://kurotask.onrender.com';
-        }
-        return `http://${hostname}:3000`;
+        return saved || `http://${window.location.hostname}:3000`;
     });
 
     const updateApiUrl = (newUrl: string) => {

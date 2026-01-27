@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import './Analytics.css';
 
+const API_BASE = `http://${window.location.hostname}:3000`;
 
 export default function Analytics() {
-    const { apiUrl } = useAuth();
     const [chartData, setChartData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // 設定スチE�EチE
+    // 設定ステート
     const [period, setPeriod] = useState('week');
     const [unit, setUnit] = useState('minutes');
     const [selectedTaskId, setSelectedTaskId] = useState('all');
@@ -33,7 +32,7 @@ export default function Analytics() {
     const fetchMetadata = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${apiUrl}/tasks`, {
+            const res = await axios.get(`${API_BASE}/tasks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTasks(res.data.tasks);
@@ -53,7 +52,7 @@ export default function Analytics() {
             if (selectedTaskId !== 'all') params.append('taskId', selectedTaskId);
             if (selectedCategoryId !== 'all') params.append('categoryId', selectedCategoryId);
 
-            const res = await axios.get(`${apiUrl}/analytics/data?${params.toString()}`, {
+            const res = await axios.get(`${API_BASE}/analytics/data?${params.toString()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setChartData(res.data.chartData);
@@ -75,8 +74,8 @@ export default function Analytics() {
     };
 
     const unitLabel = {
-        seconds: '私E,
-        minutes: '刁E,
+        seconds: '秒',
+        minutes: '分',
         hours: '時間',
         days: '日'
     }[unit];
@@ -100,24 +99,24 @@ export default function Analytics() {
                                 className={period === p ? 'active' : ''}
                                 onClick={() => setPeriod(p)}
                             >
-                                {p === 'day' ? '今日' : p === 'week' ? '週閁E : p === 'month' ? '月間' : '年閁E}
+                                {p === 'day' ? '今日' : p === 'week' ? '週間' : p === 'month' ? '月間' : '年間'}
                             </button>
                         ))}
                     </div>
                 </div>
 
                 <div className="control-group">
-                    <label>単佁E/label>
+                    <label>単位</label>
                     <select value={unit} onChange={(e) => setUnit(e.target.value)}>
-                        <option value="seconds">私E/option>
-                        <option value="minutes">刁E/option>
+                        <option value="seconds">秒</option>
+                        <option value="minutes">分</option>
                         <option value="hours">時間</option>
                         <option value="days">日</option>
                     </select>
                 </div>
 
                 <div className="control-group">
-                    <label>カチE��リ</label>
+                    <label>カテゴリ</label>
                     <select value={selectedCategoryId} onChange={(e) => setSelectedCategoryId(e.target.value)}>
                         <option value="all">すべて</option>
                         {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -134,11 +133,11 @@ export default function Analytics() {
             </div>
 
             <div className="analytics-main-chart card">
-                <h3>活動アクチE��ビティ ({unitLabel})</h3>
+                <h3>活動アクティビティ ({unitLabel})</h3>
                 {loading ? (
                     <div className="chart-loading">読み込み中...</div>
                 ) : displayData.length === 0 ? (
-                    <div className="empty-chart">チE�Eタがありません</div>
+                    <div className="empty-chart">データがありません</div>
                 ) : (
                     <div className="chart-wrapper">
                         <ResponsiveContainer width="100%" height={400}>
@@ -159,13 +158,13 @@ export default function Analytics() {
 
             <div className="stats-summary-grid">
                 <div className="stat-summary-card card">
-                    <span className="stat-label">期間中の総訁E/span>
+                    <span className="stat-label">期間中の総計</span>
                     <span className="stat-value">
                         {convertValue(chartData.reduce((acc, cur) => acc + cur.seconds, 0))} {unitLabel}
                     </span>
                 </div>
                 <div className="stat-summary-card card">
-                    <span className="stat-label">ラベルあたり�E平坁E/span>
+                    <span className="stat-label">ラベルあたりの平均</span>
                     <span className="stat-value">
                         {chartData.length > 0
                             ? convertValue(Math.round(chartData.reduce((acc, cur) => acc + cur.seconds, 0) / chartData.length))
