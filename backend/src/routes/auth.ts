@@ -16,34 +16,27 @@ const requestLinkHandler: RequestHandler = async (req, res): Promise<void> => {
         return;
     }
 
-    // Create user if not exists (Lazy registration as per spec "First setup creates user")
-    // Actually spec says "Single user operation". We can just allow any email for now or lock it.
-    // For MVP v1.2, we will create if not exists.
+    try {
+        // Create user if not exists
+        let user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            user = await prisma.user.create({
+                data: { email }
+            });
+        }
 
-    // Generate code
-    // For Production (without email service), we hardcode a backdoor for the owner.
-    // In real app, this should be an environment variable or actual email sending.
-    let code = Math.random().toString(36).substring(2, 8).toUpperCase();
+        // Generate JWT token immediately
+        const secret = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+        const jwtToken = jwt.sign({ userId: user.id, email: user.email }, secret, { expiresIn: '30d' });
 
-    // BACKDOOR for easiest login
-    // Allow any email containing '8610' or 'admin', or the specific emails
-    if (email.includes('8610') || email.includes('admin') || email === 'goldenhorse8610@gmail.com') {
-        code = '000000';
+        console.log(`[AUTH] Direct login for: ${email}`);
+
+        // Return token directly - no verification needed
+        res.json({ token: jwtToken, message: "Login successful" });
+    } catch (error) {
+        console.error('[AUTH] Error during login:', error);
+        res.status(500).json({ error: "Login failed" });
     }
-
-    const token = Math.random().toString(36).substring(2, 15); // URL token
-
-    pendingAuth[token] = {
-        email,
-        code,
-        expires: Date.now() + 10 * 60 * 1000 // 10 min
-    };
-
-    // Mock Email Sending
-    console.log(`[AUTH] Login Link: http://localhost:5173/login?token=${token}`);
-    console.log(`[AUTH] Login Code: ${code}`);
-
-    res.json({ message: "Magic link sent (check console)" });
 };
 
 // POST /auth/verify

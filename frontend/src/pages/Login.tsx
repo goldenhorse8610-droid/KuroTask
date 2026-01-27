@@ -6,12 +6,9 @@ import './Login.css';
 
 export default function Login() {
     const { login, apiUrl, updateApiUrl } = useAuth();
-    const [step, setStep] = useState<'email' | 'code'>('email');
     const [email, setEmail] = useState('');
-    const [code, setCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [message, setMessage] = useState('');
     const [tempUrl, setTempUrl] = useState(apiUrl);
     const [showSettings, setShowSettings] = useState(false);
 
@@ -24,29 +21,20 @@ export default function Login() {
 
         try {
             const response = await axios.post(`${tempUrl}/auth/request-link`, { email });
-            setMessage(response.data.message);
-            setStep('code');
+            // Backend now returns token directly
+            if (response.data.token) {
+                await login(response.data.token);
+            } else {
+                setError('Login failed - no token received');
+            }
         } catch (err: any) {
-            setError(err.response?.data?.error || 'Failed to send code');
+            setError(err.response?.data?.error || 'Failed to login');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleVerify = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
 
-        try {
-            const response = await axios.post(`${tempUrl}/auth/verify`, { code });
-            await login(response.data.token);
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Invalid code');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
         <div className="login-container">
@@ -54,53 +42,23 @@ export default function Login() {
                 <h1>KuroTask</h1>
                 <p className="subtitle">誘惑に負けないタスク管理</p>
 
-                {step === 'email' ? (
-                    <form onSubmit={handleRequestLink}>
-                        <div className="form-group">
-                            <label>メールアドレス</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="your@email.com"
-                                required
-                                disabled={loading}
-                            />
-                        </div>
-                        {error && <div className="error-message">{error}</div>}
-                        <button type="submit" disabled={loading}>
-                            {loading ? '送信中...' : 'ログインコードを送信'}
-                        </button>
-                    </form>
-                ) : (
-                    <form onSubmit={handleVerify}>
-                        <div className="info-message">{message}</div>
-                        <div className="form-group">
-                            <label>認証コード</label>
-                            <input
-                                type="text"
-                                value={code}
-                                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                                placeholder="6桁のコード"
-                                maxLength={6}
-                                required
-                                disabled={loading}
-                                autoFocus
-                            />
-                        </div>
-                        {error && <div className="error-message">{error}</div>}
-                        <button type="submit" disabled={loading}>
-                            {loading ? '確認中...' : 'ログイン'}
-                        </button>
-                        <button
-                            type="button"
-                            className="secondary-button"
-                            onClick={() => { setStep('email'); setCode(''); setError(''); }}
-                        >
-                            戻る
-                        </button>
-                    </form>
-                )}
+                <form onSubmit={handleRequestLink}>
+                    <div className="form-group">
+                        <label>メールアドレス</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="your@email.com"
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+                    {error && <div className="error-message">{error}</div>}
+                    <button type="submit" disabled={loading}>
+                        {loading ? 'ログイン中...' : 'ログイン'}
+                    </button>
+                </form>
 
                 <div className="login-extra">
                     <button className="text-btn" onClick={() => setShowSettings(!showSettings)}>
