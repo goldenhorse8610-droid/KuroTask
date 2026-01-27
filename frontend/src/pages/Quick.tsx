@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import './Quick.css';
-
-const API_BASE = `http://${window.location.hostname}:3000`;
 
 interface Message {
     id: string;
@@ -12,6 +11,7 @@ interface Message {
 }
 
 export default function Quick() {
+    const { apiUrl } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -41,7 +41,7 @@ export default function Quick() {
     const fetchMessages = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${API_BASE}/quick`, {
+            const res = await axios.get(`${apiUrl}/quick`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMessages(res.data.messages);
@@ -53,7 +53,7 @@ export default function Quick() {
     const fetchCategories = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${API_BASE}/tasks`, {
+            const res = await axios.get(`${apiUrl}/tasks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const cats = Array.from(new Set(res.data.tasks.map((t: any) => t.category).filter(Boolean))) as string[];
@@ -123,7 +123,7 @@ export default function Quick() {
         setLoading(true);
 
         try {
-            const res = await axios.post(`${API_BASE}/quick`, { content: userText }, {
+            const res = await axios.post(`${apiUrl}/quick`, { content: userText }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
