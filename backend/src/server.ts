@@ -18,7 +18,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors()); // Allow all for dev
+// CORS configuration - allow Vercel frontend and local development
+app.use(cors({
+    origin: [
+        'https://kuro-task-wcmu.vercel.app',
+        'http://localhost:5173',
+        /^http:\/\/192\.168\.\d+\.\d+:5173$/,  // Local network
+        /^http:\/\/localhost:\d+$/  // Any localhost port
+    ],
+    credentials: true
+}));
 app.use(express.json());
 
 // Routes
