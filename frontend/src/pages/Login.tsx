@@ -19,15 +19,24 @@ export default function Login() {
         // 接続先を確定
         updateApiUrl(tempUrl);
 
+        console.log('[Login] Attempting login with:', { email, apiUrl: tempUrl });
+
         try {
             const response = await axios.post(`${tempUrl}/auth/request-link`, { email });
+            console.log('[Login] Response received:', response.data);
+
             // Backend now returns token directly
             if (response.data.token) {
+                console.log('[Login] Token received, logging in...');
                 await login(response.data.token);
             } else {
+                console.error('[Login] No token in response:', response.data);
                 setError('Login failed - no token received');
             }
         } catch (err: any) {
+            console.error('[Login] Error occurred:', err);
+            console.error('[Login] Error response:', err.response?.data);
+            console.error('[Login] Error status:', err.response?.status);
             setError(err.response?.data?.error || 'Failed to login');
         } finally {
             setLoading(false);
