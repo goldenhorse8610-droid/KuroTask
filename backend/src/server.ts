@@ -19,15 +19,30 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // CORS configuration - allow Vercel frontend and local development
-app.use(cors({
-    origin: [
-        'https://kuro-task-wcmu.vercel.app',
-        'http://localhost:5173',
-        /^http:\/\/192\.168\.\d+\.\d+:5173$/,  // Local network
-        /^http:\/\/localhost:\d+$/  // Any localhost port
-    ],
-    credentials: true
-}));
+const corsOptions = {
+    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+        const allowedOrigins = [
+            'https://kuro-task-wcmu.vercel.app',
+            'http://localhost:5173'
+        ];
+
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) !== -1 || origin.match(/^http:\/\/(localhost|192\.168\.\d+\.\d+):\d+$/)) {
+            callback(null, true);
+        } else {
+            console.log('[CORS] Blocked origin:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
