@@ -139,7 +139,6 @@
 
     .nav-label,
     .user-email,
-    .sidebar-header h2,
     .logout-button span {
         display: none;
     }
@@ -150,20 +149,85 @@
 }
 
 @media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        position: relative;
-        height: auto;
+    .layout {
+        flex-direction: column;
     }
 
-    .main-content {
-        margin-left: 0;
-        padding: 1.5rem;
+    .sidebar {
+        width: 100%;
+        position: sticky;
+        top: 0;
+        height: auto;
+        min-height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-main);
+        background: var(--bg-sidebar);
+        backdrop-filter: blur(12px);
+    }
+
+    .sidebar-header {
+        padding: 0.75rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: none;
+    }
+
+    .app-title {
+        font-size: 1.25rem;
+        margin-bottom: 0;
+    }
+
+    .user-email {
+        display: none;
     }
 
     .nav-list {
         display: flex;
         overflow-x: auto;
-        padding: 0.5rem;
+        padding: 0.25rem;
+        gap: 2px;
+        border-top: 1px solid var(--border-main);
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .nav-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-list li {
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .nav-item {
+        padding: 0.6rem 1rem;
+        flex-direction: column;
+        gap: 4px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        min-width: 64px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nav-icon {
+        font-size: 1.1rem;
+    }
+
+    .nav-label {
+        display: block !important;
+        font-size: 0.65rem;
+        text-align: center;
+    }
+
+    .sidebar-footer {
+        display: none;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 1.25rem;
     }
 }

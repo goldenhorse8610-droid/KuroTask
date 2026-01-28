@@ -150,6 +150,10 @@
 }
 
 @media (max-width: 768px) {
+    .active-session-card {
+        padding: 2rem 1.25rem;
+    }
+
     .time-main {
         font-size: 3.5rem;
     }
