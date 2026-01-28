@@ -92,6 +92,7 @@ export default function Calendar() {
             type: formType,
             category: formCategory || null,
             memo: formMemo || null,
+            isFavorite: false,
             idleMonitorEnabled: formType !== 'checklist' ? formIdleMonitor : false,
             defaultTimerDurationSec: formType === 'timer' && formDefaultDuration
                 ? parseInt(formDefaultDuration) * 60
@@ -106,9 +107,10 @@ export default function Calendar() {
             resetForm();
             setShowAddModal(false);
             fetchEvents();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to create task:', error);
-            alert('タスクの作成に失敗しました');
+            const errorMsg = error.response?.data?.error || error.message || '不明なエラー';
+            alert(`タスクの作成に失敗しました: ${errorMsg}`);
         }
     };
 

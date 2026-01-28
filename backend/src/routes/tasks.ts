@@ -82,7 +82,8 @@ router.post('/', async (req: any, res: Response) => {
 
         res.json({ task });
     } catch (error) {
-        console.error('Error creating task:', error);
+        console.error('[Tasks] Error creating task:', error);
+        console.error('[Tasks] Payload:', req.body);
         res.status(500).json({ error: 'Failed to create task' });
     }
 });
