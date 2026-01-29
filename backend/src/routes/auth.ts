@@ -88,10 +88,24 @@ const meHandler: RequestHandler = async (req, res): Promise<void> => {
 
     const token = authHeader.split(' ')[1];
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
+        const secret = process.env.JWT_SECRET || 'secret';
+        const decoded = jwt.verify(token, secret) as any;
         const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         if (!user) { res.status(401).send(); return; }
-        res.json({ user });
+
+        // Generate HMAC-based calendarToken
+        const calendarToken = crypto
+            .createHmac('sha256', secret)
+            .update(user.id)
+            .digest('hex');
+
+        res.json({
+            user: {
+                id: user.id,
+                email: user.email,
+                calendarToken: calendarToken
+            }
+        });
     } catch (e) {
         res.status(401).send();
     }

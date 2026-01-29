@@ -241,12 +241,12 @@ export default function Settings() {
                                 <input
                                     type="text"
                                     readOnly
-                                    value={user?.calendarToken ? `${apiUrl}/calendar-feed/feed/${user.calendarToken}.ics` : '発行中...'}
+                                    value={user?.calendarToken ? `${apiUrl}/calendar-feed/feed/${user.id}/${user.calendarToken}.ics` : '発行中...'}
                                 />
                                 <button
                                     className="secondary sm"
                                     onClick={() => {
-                                        const url = `${apiUrl}/calendar-feed/feed/${user?.calendarToken}.ics`;
+                                        const url = `${apiUrl}/calendar-feed/feed/${user?.id}/${user?.calendarToken}.ics`;
                                         navigator.clipboard.writeText(url);
                                         alert('URLをコピーしました');
                                     }}
