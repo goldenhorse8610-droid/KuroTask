@@ -27,7 +27,7 @@ const requestLinkHandler: RequestHandler = async (req, res): Promise<void> => {
         }
 
         // Generate JWT token immediately
-        const secret = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+        const secret = process.env.JWT_SECRET || 'secret';
         const jwtToken = jwt.sign({ userId: user.id, email: user.email }, secret, { expiresIn: '30d' });
 
         console.log(`[AUTH] Direct login for: ${email}`);
@@ -36,7 +36,10 @@ const requestLinkHandler: RequestHandler = async (req, res): Promise<void> => {
         res.json({ token: jwtToken, message: "Login successful" });
     } catch (error) {
         console.error('[AUTH] Error during login:', error);
-        res.status(500).json({ error: "Login failed" });
+        res.status(500).json({
+            error: "Login failed",
+            details: error instanceof Error ? error.message : String(error)
+        });
     }
 };
 
