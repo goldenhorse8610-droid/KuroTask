@@ -89,24 +89,9 @@ const meHandler: RequestHandler = async (req, res): Promise<void> => {
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
-        let user = await prisma.user.findUnique({ where: { id: decoded.userId } }) as any;
+        const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         if (!user) { res.status(401).send(); return; }
-
-        // Generate calendarToken if missing
-        if (!user.calendarToken) {
-            user = await prisma.user.update({
-                where: { id: user.id },
-                data: { calendarToken: crypto.randomUUID() }
-            }) as any;
-        }
-
-        res.json({
-            user: {
-                id: user.id,
-                email: user.email,
-                calendarToken: user.calendarToken
-            }
-        });
+        res.json({ user });
     } catch (e) {
         res.status(401).send();
     }
