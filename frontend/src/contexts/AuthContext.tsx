@@ -5,6 +5,7 @@ import axios from 'axios';
 interface User {
     id: string;
     email: string;
+    calendarToken?: string;
     createdAt: string;
 }
 

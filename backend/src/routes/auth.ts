@@ -1,6 +1,7 @@
 import { Router, Request, Response, RequestHandler } from 'express';
 import prisma from '../prisma';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 const router = Router();
 
@@ -88,9 +89,24 @@ const meHandler: RequestHandler = async (req, res): Promise<void> => {
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
-        const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+        let user = await prisma.user.findUnique({ where: { id: decoded.userId } }) as any;
         if (!user) { res.status(401).send(); return; }
-        res.json({ user });
+
+        // Generate calendarToken if missing
+        if (!user.calendarToken) {
+            user = await prisma.user.update({
+                where: { id: user.id },
+                data: { calendarToken: crypto.randomUUID() }
+            }) as any;
+        }
+
+        res.json({
+            user: {
+                id: user.id,
+                email: user.email,
+                calendarToken: user.calendarToken
+            }
+        });
     } catch (e) {
         res.status(401).send();
     }

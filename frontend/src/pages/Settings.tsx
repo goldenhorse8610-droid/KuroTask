@@ -5,7 +5,7 @@ import { requestNotificationPermission } from '../utils/notifications';
 import './Settings.css';
 
 export default function Settings() {
-    const { apiUrl } = useAuth();
+    const { apiUrl, user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [permissionStatus, setPermissionStatus] = useState(Notification.permission);
@@ -220,6 +220,40 @@ export default function Settings() {
                                 value={settings.silentHoursEnd}
                                 onChange={(e) => setSettings({ ...settings, silentHoursEnd: e.target.value })}
                             />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="settings-section">
+                <h3>Googleカレンダー連携 (iCalendar)</h3>
+                <div className="settings-card">
+                    <div className="setting-item">
+                        <div className="setting-info">
+                            <span className="setting-label">カレンダーフィードURL</span>
+                            <p className="setting-description">
+                                このURLをGoogleカレンダーの「URLで追加」に登録すると、予定タスクが表示されます。<br />
+                                <small>※このURLは誰にも教えないでください。外部から予定が見えるようになります。</small>
+                            </p>
+                        </div>
+                        <div className="setting-action-block">
+                            <div className="url-copy-box">
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={user?.calendarToken ? `${apiUrl}/calendar-feed/feed/${user.calendarToken}.ics` : '発行中...'}
+                                />
+                                <button
+                                    className="secondary sm"
+                                    onClick={() => {
+                                        const url = `${apiUrl}/calendar-feed/feed/${user?.calendarToken}.ics`;
+                                        navigator.clipboard.writeText(url);
+                                        alert('URLをコピーしました');
+                                    }}
+                                >
+                                    コピー
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

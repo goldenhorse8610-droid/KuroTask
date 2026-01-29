@@ -11,6 +11,7 @@ import recurringRoutes from './routes/recurring';
 import idleMonitorRoutes from './routes/idleMonitor';
 import analyticsRoutes from './routes/analytics';
 import calendarRoutes from './routes/calendar';
+import calendarFeedRoutes from './routes/calendarFeed';
 import syncRoutes from './routes/sync';
 
 dotenv.config();
@@ -56,6 +57,7 @@ app.use('/recurring', recurringRoutes);
 app.use('/idle-monitor', idleMonitorRoutes);
 app.use('/analytics', analyticsRoutes);
 app.use('/calendar', calendarRoutes);
+app.use('/calendar-feed', calendarFeedRoutes);
 app.use('/sync', syncRoutes);
 
 app.get('/health', (req, res) => {

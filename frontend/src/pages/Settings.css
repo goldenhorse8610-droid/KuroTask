@@ -97,3 +97,62 @@
 .settings-actions button {
     min-width: 240px;
 }
+
+/* カレンダー連携用 */
+.url-copy-box {
+    display: flex;
+    gap: 8px;
+    background: var(--bg-input);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border-main);
+    width: 100%;
+}
+
+.url-copy-box input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-family: monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.url-copy-box input:focus {
+    outline: none;
+}
+
+.setting-action-block {
+    flex: 2;
+    max-width: 500px;
+}
+
+@media (max-width: 768px) {
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .setting-info {
+        padding-right: 0;
+    }
+
+    .setting-action,
+    .setting-action-block {
+        width: 100%;
+        max-width: none;
+    }
+
+    .url-copy-box {
+        flex-direction: column;
+        padding: 8px;
+    }
+
+    .url-copy-box button {
+        width: 100%;
+    }
+}
