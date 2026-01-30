@@ -35,9 +35,9 @@ export default function Login() {
             }
         } catch (err: any) {
             console.error('[Login] Error occurred:', err);
-            console.error('[Login] Error response:', err.response?.data);
-            console.error('[Login] Error status:', err.response?.status);
-            setError(err.response?.data?.error || 'Failed to login');
+            const errorMsg = err.response?.data?.error || 'Failed to login';
+            const details = err.response?.data?.details;
+            setError(details ? `${errorMsg} (${details})` : errorMsg);
         } finally {
             setLoading(false);
         }

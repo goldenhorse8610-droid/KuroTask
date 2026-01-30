@@ -7,7 +7,7 @@ const router = Router();
 // GET /calendar/feed/:userId/:token
 router.get('/feed/:userId/:token', async (req: Request, res: Response) => {
     try {
-        const { userId } = req.params;
+        const userId = req.params.userId as string;
         const tokenWithExt = req.params.token as string;
         const token = tokenWithExt.replace('.ics', '');
 
@@ -25,7 +25,7 @@ router.get('/feed/:userId/:token', async (req: Request, res: Response) => {
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: userId },
+            where: { id: userId } as any,
             include: {
                 tasks: {
                     where: {
@@ -33,7 +33,7 @@ router.get('/feed/:userId/:token', async (req: Request, res: Response) => {
                         isArchived: false,
                     }
                 }
-            }
+            } as any
         });
 
         if (!user) {

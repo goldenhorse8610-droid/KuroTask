@@ -93,7 +93,7 @@ const meHandler: RequestHandler = async (req, res): Promise<void> => {
     try {
         const secret = process.env.JWT_SECRET || 'secret';
         const decoded = jwt.verify(token, secret) as any;
-        const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+        const user = await prisma.user.findUnique({ where: { id: String(decoded.userId) } });
         if (!user) { res.status(401).send(); return; }
 
         // Generate HMAC-based calendarToken
