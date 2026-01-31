@@ -52,11 +52,18 @@ router.get('/feed/:userId/:token', async (req: Request, res: Response) => {
         ];
 
         (user as any).tasks.forEach((task: any) => {
-            if (!task.plannedDate) return;
+            const start = task.plannedStartAt || task.plannedDate;
+            if (!start) return;
 
-            const startDate = new Date(task.plannedDate);
-            // End date is 30 mins after start date by default if no duration
-            const endDate = new Date(startDate.getTime() + 30 * 60000);
+            const startDate = new Date(start);
+            let endDate: Date;
+
+            if (task.plannedEndAt) {
+                endDate = new Date(task.plannedEndAt);
+            } else {
+                // End date is 30 mins after start date by default if no duration
+                endDate = new Date(startDate.getTime() + 30 * 60000);
+            }
 
             const formatICSDate = (date: Date) => {
                 return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';

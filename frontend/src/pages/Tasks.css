@@ -216,3 +216,16 @@
         gap: 8px;
     }
 }
+
+.form-group.row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-group.row .col {
+    flex: 1;
+}
+
+.form-group.row .col input {
+    width: 100%;
+}

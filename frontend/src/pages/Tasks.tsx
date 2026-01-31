@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { format } from 'date-fns';
 import { Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import StartSessionDialog from '../components/StartSessionDialog';
@@ -16,6 +17,9 @@ interface Task {
     idleMonitorEnabled: boolean;
     defaultTimerDurationSec: number | null;
     isArchived: boolean;
+    plannedDate: string | null;
+    plannedStartAt: string | null;
+    plannedEndAt: string | null;
     createdAt: string;
     _count?: {
         timerSessions: number;
@@ -48,6 +52,8 @@ export default function Tasks() {
     const [formMemo, setFormMemo] = useState('');
     const [formIdleMonitor, setFormIdleMonitor] = useState(false);
     const [formDefaultDuration, setFormDefaultDuration] = useState('');
+    const [formStartTime, setFormStartTime] = useState('');
+    const [formEndTime, setFormEndTime] = useState('');
     const [showNewCategory, setShowNewCategory] = useState(false);
 
     useEffect(() => {
@@ -126,6 +132,8 @@ export default function Tasks() {
         setFormMemo(task.memo || '');
         setFormIdleMonitor(task.idleMonitorEnabled);
         setFormDefaultDuration(task.defaultTimerDurationSec ? (task.defaultTimerDurationSec / 60).toString() : '');
+        setFormStartTime(task.plannedStartAt ? format(new Date(task.plannedStartAt), "yyyy-MM-dd'T'HH:mm") : '');
+        setFormEndTime(task.plannedEndAt ? format(new Date(task.plannedEndAt), "yyyy-MM-dd'T'HH:mm") : '');
         setShowNewCategory(false);
         setShowModal(true);
     };
@@ -137,6 +145,8 @@ export default function Tasks() {
         setFormMemo('');
         setFormIdleMonitor(false);
         setFormDefaultDuration('');
+        setFormStartTime('');
+        setFormEndTime('');
         setShowNewCategory(false);
     };
 
@@ -153,6 +163,8 @@ export default function Tasks() {
             defaultTimerDurationSec: formType === 'timer' && formDefaultDuration
                 ? parseInt(formDefaultDuration) * 60
                 : null,
+            plannedStartAt: formStartTime ? new Date(formStartTime).toISOString() : null,
+            plannedEndAt: formEndTime ? new Date(formEndTime).toISOString() : null,
         };
 
         try {
@@ -365,6 +377,25 @@ export default function Tasks() {
                                     placeholder="このタスクの詳細や目的を記入"
                                     rows={3}
                                 />
+                            </div>
+
+                            <div className="form-group row">
+                                <div className="col">
+                                    <label>開始日時</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={formStartTime}
+                                        onChange={(e) => setFormStartTime(e.target.value)}
+                                    />
+                                </div>
+                                <div className="col">
+                                    <label>終了日時</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={formEndTime}
+                                        onChange={(e) => setFormEndTime(e.target.value)}
+                                    />
+                                </div>
                             </div>
 
                             {formType !== 'checklist' && (

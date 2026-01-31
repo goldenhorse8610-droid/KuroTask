@@ -43,6 +43,8 @@ export default function Calendar() {
     const [formMemo, setFormMemo] = useState('');
     const [formIdleMonitor, setFormIdleMonitor] = useState(false);
     const [formDefaultDuration, setFormDefaultDuration] = useState('');
+    const [formStartTime, setFormStartTime] = useState('');
+    const [formEndTime, setFormEndTime] = useState('');
     const [showNewCategory, setShowNewCategory] = useState(false);
 
     useEffect(() => {
@@ -97,7 +99,9 @@ export default function Calendar() {
             defaultTimerDurationSec: formType === 'timer' && formDefaultDuration
                 ? parseInt(formDefaultDuration) * 60
                 : null,
-            plannedDate: selectedDate.toISOString(), // 選択された日付を予定日に設定
+            plannedDate: selectedDate.toISOString(),
+            plannedStartAt: formStartTime ? new Date(`${format(selectedDate, 'yyyy-MM-dd')}T${formStartTime}`).toISOString() : null,
+            plannedEndAt: formEndTime ? new Date(`${format(selectedDate, 'yyyy-MM-dd')}T${formEndTime}`).toISOString() : null,
         };
 
         try {
@@ -121,6 +125,8 @@ export default function Calendar() {
         setFormMemo('');
         setFormIdleMonitor(false);
         setFormDefaultDuration('');
+        setFormStartTime('');
+        setFormEndTime('');
         setShowNewCategory(false);
     };
 
@@ -220,7 +226,7 @@ export default function Calendar() {
                     <div className="cell-events">
                         {dayEvents.map((ev, idx) => (
                             <div key={idx} className={`calendar-event-pill ${ev.type}`} title={ev.title}>
-                                {ev.type === 'session' ? <span className="ev-time">{ev.time}</span> : <span className="ev-icon">予定</span>}
+                                {ev.time ? <span className="ev-time">{ev.time}</span> : ev.type === 'todo' ? <span className="ev-icon">予定</span> : null}
                                 <span className="ev-title">{ev.title}</span>
                             </div>
                         ))}
@@ -267,7 +273,7 @@ export default function Calendar() {
                                     {dayEvents.map((ev, idx) => (
                                         <div key={idx} className={`calendar-event-pill ${ev.type} large`}>
                                             <div className="ev-top">
-                                                {ev.type === 'session' ? <span className="ev-time">{ev.time}</span> : <span className="ev-tag">予定</span>}
+                                                {ev.time ? <span className="ev-time">{ev.time}</span> : ev.type === 'todo' ? <span className="ev-tag">予定</span> : null}
                                                 <span className="ev-title">{ev.title}</span>
                                             </div>
                                             {ev.duration && <div className="ev-duration">{Math.round(ev.duration / 60)}分</div>}
@@ -422,6 +428,27 @@ export default function Calendar() {
                                     placeholder="詳細や目的"
                                     rows={3}
                                 />
+                            </div>
+
+                            <div className="form-group row" style={{ display: 'flex', gap: '1rem' }}>
+                                <div style={{ flex: 1 }}>
+                                    <label>開始時間</label>
+                                    <input
+                                        type="time"
+                                        value={formStartTime}
+                                        onChange={(e) => setFormStartTime(e.target.value)}
+                                        style={{ width: '100%' }}
+                                    />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <label>終了時間</label>
+                                    <input
+                                        type="time"
+                                        value={formEndTime}
+                                        onChange={(e) => setFormEndTime(e.target.value)}
+                                        style={{ width: '100%' }}
+                                    />
+                                </div>
                             </div>
 
                             {formType !== 'checklist' && (

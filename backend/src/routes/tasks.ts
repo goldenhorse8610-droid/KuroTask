@@ -56,6 +56,8 @@ router.post('/', async (req: any, res: Response) => {
             idleMonitorEnabled,
             defaultTimerDurationSec,
             plannedDate,
+            plannedStartAt,
+            plannedEndAt,
         } = req.body;
 
         if (!name || !type) {
@@ -77,7 +79,9 @@ router.post('/', async (req: any, res: Response) => {
                 idleMonitorEnabled: idleMonitorEnabled || false,
                 defaultTimerDurationSec: defaultTimerDurationSec || null,
                 plannedDate: plannedDate ? new Date(plannedDate) : null,
-            },
+                plannedStartAt: plannedStartAt ? new Date(plannedStartAt) : null,
+                plannedEndAt: plannedEndAt ? new Date(plannedEndAt) : null,
+            } as any,
         });
 
         res.json({ task });
@@ -100,6 +104,8 @@ router.patch('/:id', async (req: any, res: Response) => {
             idleMonitorEnabled,
             defaultTimerDurationSec,
             plannedDate,
+            plannedStartAt,
+            plannedEndAt,
         } = req.body;
 
         const task = await prisma.task.findFirst({
@@ -120,7 +126,9 @@ router.patch('/:id', async (req: any, res: Response) => {
                 idleMonitorEnabled: idleMonitorEnabled !== undefined ? idleMonitorEnabled : task.idleMonitorEnabled,
                 defaultTimerDurationSec: defaultTimerDurationSec !== undefined ? defaultTimerDurationSec : task.defaultTimerDurationSec,
                 plannedDate: plannedDate !== undefined ? (plannedDate ? new Date(plannedDate) : null) : task.plannedDate,
-            },
+                plannedStartAt: plannedStartAt !== undefined ? (plannedStartAt ? new Date(plannedStartAt) : null) : (task as any).plannedStartAt,
+                plannedEndAt: plannedEndAt !== undefined ? (plannedEndAt ? new Date(plannedEndAt) : null) : (task as any).plannedEndAt,
+            } as any,
         });
 
         res.json({ task: updatedTask });

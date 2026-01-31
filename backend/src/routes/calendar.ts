@@ -49,9 +49,12 @@ router.get('/events', async (req: any, res: Response) => {
         const plannedTasks = await prisma.task.findMany({
             where: {
                 userId,
-                plannedDate: { gte: startDate, lte: endDate },
+                OR: [
+                    { plannedDate: { gte: startDate, lte: endDate } },
+                    { plannedStartAt: { gte: startDate, lte: endDate } }
+                ],
                 isArchived: false,
-            }
+            } as any
         });
 
         // 日付ごとにグループ化
@@ -69,18 +72,24 @@ router.get('/events', async (req: any, res: Response) => {
             });
         });
 
-        plannedTasks.forEach(t => {
-            const dateStr = t.plannedDate!.toISOString().split('T')[0];
+        plannedTasks.forEach((t: any) => {
+            const date = t.plannedStartAt || t.plannedDate;
+            if (!date) return;
+            const dateStr = new Date(date).toISOString().split('T')[0];
             if (!eventsByDate[dateStr]) eventsByDate[dateStr] = [];
-            // 同じタスクのセッションが既にある場合でも「予定」として表示するか、
-            // それとも「予定」枠として別出しするか。
-            // ユーザーは「予定タスクを確認できるように」と言っているので並べて出す。
+
+            const timeStr = t.plannedStartAt ?
+                new Date(t.plannedStartAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) :
+                undefined;
+
             eventsByDate[dateStr].push({
                 id: t.id,
                 type: 'todo',
                 title: t.name,
                 category: t.category,
-                memo: t.memo
+                memo: t.memo,
+                time: timeStr,
+                plannedEndAt: t.plannedEndAt
             });
         });
 

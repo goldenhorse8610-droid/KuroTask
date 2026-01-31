@@ -36,6 +36,8 @@ model Task {
   idleMonitorEnabled   Boolean  @default(false)
   defaultTimerDurationSec Int?
   plannedDate          DateTime?
+  plannedStartAt       DateTime?
+  plannedEndAt         DateTime?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
