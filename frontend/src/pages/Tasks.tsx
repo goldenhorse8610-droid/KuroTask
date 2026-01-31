@@ -176,12 +176,14 @@ export default function Tasks() {
                 await axios.post(`${apiUrl}/tasks`, data, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
+                resetForm(); // Reset form only on successful creation
             }
             setShowModal(false);
             fetchTasks();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to save task:', error);
-            alert('タスクの保存に失敗しました');
+            const errorMsg = error.response?.data?.error || error.response?.data?.details || error.message || '不明なエラー';
+            alert(`タスクの保存に失敗しました: ${errorMsg}`);
         }
     };
 
