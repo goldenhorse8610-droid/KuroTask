@@ -116,7 +116,7 @@ export default function Recurring() {
                                 </select>
                             </div>
 
-                            <div className="form-group checkbox">
+                            <div className="form-group checkbox-group">
                                 <label>
                                     <input
                                         type="checkbox"
