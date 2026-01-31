@@ -1,26 +1,9 @@
 import { Router, Response } from 'express';
 import prisma from '../prisma';
-import jwt from 'jsonwebtoken';
+import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
-
-// Middleware
-const authMiddleware = async (req: any, res: Response, next: any) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
-        const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
-        if (!user) return res.status(401).json({ error: 'User not found' });
-        req.user = user;
-        next();
-    } catch (e) {
-        return res.status(401).json({ error: 'Invalid token' });
-    }
-};
-
-router.use(authMiddleware);
+router.use(authMiddleware as any);
 
 // GET /analytics/data - 高度な統計集計
 router.get('/data', async (req: any, res: Response) => {
