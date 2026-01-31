@@ -182,7 +182,7 @@ export default function Tasks() {
             fetchTasks();
         } catch (error: any) {
             console.error('Failed to save task:', error);
-            const errorMsg = error.response?.data?.error || error.response?.data?.details || error.message || '不明なエラー';
+            const errorMsg = error.response?.data?.details || error.response?.data?.error || error.message || '不明なエラー';
             alert(`タスクの保存に失敗しました: ${errorMsg}`);
         }
     };
