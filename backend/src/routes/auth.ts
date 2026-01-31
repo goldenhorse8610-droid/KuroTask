@@ -18,24 +18,29 @@ const requestLinkHandler: RequestHandler = async (req, res): Promise<void> => {
     }
 
     try {
+        console.log(`[AUTH] Checking user for email: ${email}`);
         // Create user if not exists
         let user = await prisma.user.findUnique({ where: { email } });
+        console.log(`[AUTH] findUnique result: ${user ? 'found' : 'not found'}`);
+
         if (!user) {
+            console.log(`[AUTH] Creating new user: ${email}`);
             user = await prisma.user.create({
                 data: { email }
             });
+            console.log(`[AUTH] user.create success for: ${email}`);
         }
 
         // Generate JWT token immediately
         const secret = process.env.JWT_SECRET || 'secret';
         const jwtToken = jwt.sign({ userId: user.id, email: user.email }, secret, { expiresIn: '30d' });
 
-        console.log(`[AUTH] Direct login for: ${email}`);
+        console.log(`[AUTH] JWT signed successfully for: ${email}`);
 
         // Return token directly - no verification needed
         res.json({ token: jwtToken, message: "Login successful" });
     } catch (error) {
-        console.error('[AUTH] Error during login:', error);
+        console.error('[AUTH] ERROR during login:', error);
         res.status(500).json({
             error: "Login failed",
             details: error instanceof Error ? error.message : String(error)
