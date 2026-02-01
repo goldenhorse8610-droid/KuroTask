@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '../prisma';
+import { withRetry } from '../utils/retry';
 
 export interface AuthRequest extends Request {
     user?: any;
@@ -21,9 +22,9 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         const secret = process.env.JWT_SECRET || 'secret';
         const decoded = jwt.verify(token, secret) as any;
 
-        // Attempt to find user. If DB is down, this will throw.
+        // Attempt to find user with retry logic to handle temporary DB issues.
         try {
-            const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+            const user = await withRetry(() => prisma.user.findUnique({ where: { id: decoded.userId } }));
             if (!user) {
                 return res.status(401).json({ error: 'User not found' });
             }

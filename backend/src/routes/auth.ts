@@ -2,6 +2,7 @@ import { Router, Request, Response, RequestHandler } from 'express';
 import prisma from '../prisma';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import { withRetry } from '../utils/retry';
 
 const router = Router();
 
@@ -19,15 +20,15 @@ const requestLinkHandler: RequestHandler = async (req, res): Promise<void> => {
 
     try {
         console.log(`[AUTH] Checking user for email: ${email}`);
-        // Create user if not exists
-        let user = await prisma.user.findUnique({ where: { email } });
+        // Create user if not exists with retry
+        let user = await withRetry(() => prisma.user.findUnique({ where: { email } }));
         console.log(`[AUTH] findUnique result: ${user ? 'found' : 'not found'}`);
 
         if (!user) {
             console.log(`[AUTH] Creating new user: ${email}`);
-            user = await prisma.user.create({
+            user = await withRetry(() => prisma.user.create({
                 data: { email }
-            });
+            }));
             console.log(`[AUTH] user.create success for: ${email}`);
         }
 
@@ -98,7 +99,7 @@ const meHandler: RequestHandler = async (req, res): Promise<void> => {
     try {
         const secret = process.env.JWT_SECRET || 'secret';
         const decoded = jwt.verify(token, secret) as any;
-        const user = await prisma.user.findUnique({ where: { id: String(decoded.userId) } });
+        const user = await withRetry(() => prisma.user.findUnique({ where: { id: String(decoded.userId) } }));
         if (!user) { res.status(401).send(); return; }
 
         // Generate HMAC-based calendarToken

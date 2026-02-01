@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
 
-    const checkAuth = async () => {
+    const checkAuth = async (isRetry = false) => {
         const token = localStorage.getItem('token');
         if (!token) {
             setLoading(false);
@@ -57,16 +57,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         try {
+            console.log(`[AuthContext] Checking auth... (isRetry: ${isRetry})`);
             const response = await axios.get(`${apiUrl}/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUser(response.data.user);
-        } catch (error) {
-            console.error('Auth check failed:', error);
+        } catch (error: any) {
+            console.error('Auth check failed:', error.response?.data || error.message);
+
+            // If it's a 503 (DB connection failed) or a network error, and we haven't retried yet, try once more
+            const isRetryable = !isRetry && (error.response?.status === 503 || !error.response);
+
+            if (isRetryable) {
+                console.log('[AuthContext] Temporary error detected, retrying in 3 seconds...');
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                return checkAuth(true);
+            }
+
+            // Real failure or retry failed
             localStorage.removeItem('token');
             setUser(null);
         } finally {
-            setLoading(false);
+            if (!isRetry) {
+                setLoading(false);
+            }
         }
     };
 
