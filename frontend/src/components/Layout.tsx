@@ -14,6 +14,7 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
     const navItems = [
         { id: 'home', label: 'Home', icon: '🏠' },
         { id: 'tasks', label: 'Tasks', icon: '✓' },
+        { id: 'taskList', label: 'List', icon: '📋' },
         { id: 'recurring', label: 'Recurring', icon: '🔁' },
         { id: 'quick', label: 'Quick', icon: '💬' },
         { id: 'calendar', label: 'Calendar', icon: '📅' },

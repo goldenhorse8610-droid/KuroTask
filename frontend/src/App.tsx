@@ -9,6 +9,7 @@ import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import Quick from './pages/Quick';
 import Calendar from './pages/Calendar';
+import TaskList from './pages/TaskList';
 import Login from './pages/Login';
 import './App.css';
 
@@ -34,6 +35,8 @@ function App() {
         return <Home />;
       case 'tasks':
         return <Tasks />;
+      case 'taskList':
+        return <TaskList />;
       case 'recurring':
         return <Recurring />;
       case 'quick':
